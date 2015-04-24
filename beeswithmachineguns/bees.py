@@ -253,10 +253,10 @@ def _attack(params):
         pem_path = params.get('key_name') and _get_pem_path(params['key_name']) or None
         if not os.path.isfile(pem_path):
             client.load_system_host_keys()
-            client.connect(params['instance_name'], username=params['username'])
+            client.connect(params['instance_ip'], username=params['username'])
         else:
             client.connect(
-                params['instance_name'],
+                params['instance_ip'],
                 username=params['username'],
                 key_filename=pem_path)
 
@@ -278,7 +278,7 @@ def _attack(params):
 
         if params['post_file']:
             pem_file_path=_get_pem_path(params['key_name'])
-            os.system("scp -q -o 'StrictHostKeyChecking=no' -i %s %s %s@%s:/tmp/honeycomb" % (pem_file_path, params['post_file'], params['username'], params['instance_name']))
+            os.system("scp -q -o 'StrictHostKeyChecking=no' -i %s %s %s@%s:/tmp/honeycomb" % (pem_file_path, params['post_file'], params['username'], params['instance_ip']))
             options += ' -T "%(mime_type)s; charset=UTF-8" -p /tmp/honeycomb' % params
 
         if params['keep_alive']:
@@ -549,6 +549,7 @@ def attack(url, n, c, **options):
             'i': i,
             'instance_id': instance.id,
             'instance_name': instance.private_dns_name if instance.public_dns_name == "" else instance.public_dns_name,
+            'instance_ip': instance.private_ip_address,
             'url': url,
             'concurrent_requests': connections_per_instance,
             'num_requests': requests_per_instance,
